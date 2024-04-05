@@ -76,7 +76,7 @@ function App() {
 
   const pollingState = usePolling(video?.id || "", shouldPoll, callback);
 
-  const { data: pollingData, error: pollingError, isPolling } = pollingState;
+  const { isPolling } = pollingState;
 
   const showVideoPlaceHolder = shouldPoll && isPolling;
 
