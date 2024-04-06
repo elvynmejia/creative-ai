@@ -200,15 +200,18 @@ function App() {
     <div className="container">
       <h1 className="text-3xl font-bold">Bring your images to life</h1>
       <div className="py-10">
-        <div className="flex w-full component-preview p-4 items-center justify-center gap-2 font-sans">
-          <Textarea
-            placeholder="Describe the scene" 
-            size="lg" 
-            onChange={handlePromptChange}
-            value={prompt}
-          />
+        <div className="flex flex-col justify-center space-y-2">
+          <div className="flex flex-col space-y-2">
+            <p className="text-1xl">Describe the desired scene you would like to see</p>
+            <Textarea
+              placeholder="A busy cyberpunk street"
+              size="lg"
+              onChange={handlePromptChange}
+              value={prompt}
+            />
+          </div>
+          <FileInput onChange={handleUpload} />
         </div>
-        <FileInput onChange={handleUpload} />
       </div>
       <div className="flex justify-center flex-row">
         <Card className="flex flex-row">
