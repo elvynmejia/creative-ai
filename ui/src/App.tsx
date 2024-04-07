@@ -1,8 +1,8 @@
 import "./App.css";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { FileInput, Textarea } from "react-daisyui";
+import { FileInput, Textarea, Button, Divider } from "react-daisyui";
 import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
 
@@ -26,8 +26,10 @@ type Video = {
 };
 
 function App() {
+  const sourceFileRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState("");
   const [videos, setVideos] = useState<Video[]>([]);
+  const [sourceFile, setSourceFile] = useState<File>();
 
   useEffect(() => {
     const getVideos = async () => {
@@ -72,18 +74,15 @@ function App() {
     }
   };
 
+  const getFileExtension = (filename: string) => {
+    return filename.split(".").pop()!;
+  };
+
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
-
-    if (prompt === "") {
-      alert("Please describe the scene you want based on the provided image");
-      event.target.value = "";
-      return;
-    }
-
     if (event.target.files) {
       const image = event.target.files[0];
-      const fileExt = image.name.split(".").pop()!;
+      const fileExt = getFileExtension(image.name);
 
       if (!ALLOWED_IMAGE_EXTENSIONS.includes(fileExt)) {
         alert(
@@ -93,58 +92,93 @@ function App() {
         return;
       }
 
-      const fileId = uuidv4();
-
-      const fileName = `${fileId}.${fileExt}`;
-
-      const { error } = await supabase.storage
-        .from("images")
-        .upload(fileName, image, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) {
-        alert("Unable to uplaod video. Please try again.");
-        event.target.value = "";
-        return;
-      }
-
-      const publicUrlResponse = supabase.storage
-        .from("images")
-        .getPublicUrl(fileName);
-
-      const { publicUrl } = publicUrlResponse.data;
-
-      try {
-        const response = await axios.post(`${API_URL}/api/v1/videos`, {
-          user_id: localStorage.getItem(ANON_USER_ID),
-          image_url: publicUrl,
-          prompt: prompt,
-        });
-
-        setVideos((prev) => {
-          return [
-            {
-              id: response.data.video.id,
-              status: response.data.video.status,
-              image_url: response.data.video.image_url,
-              video_url: "",
-            },
-            ...prev,
-          ];
-        });
-      } catch (error: any) {
-        event.target.value = "";
-        alert(`An error accurred: ${error.message}. Try again`);
-      }
+      setSourceFile(image);
+      return;
     }
+
+    alert("Please provide a source image. Try again.");
   };
 
   const handlePromptChange = (
     event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     setPrompt(event.target.value);
+  };
+
+  const create = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    if (prompt === "" || sourceFile === undefined) {
+      alert(
+        "Unable to generate video. Please describe the scene and upload a source image",
+      );
+      return;
+    }
+
+    const fileId = uuidv4();
+
+    const fileExt = getFileExtension(sourceFile.name);
+
+    const fileName = `${fileId}.${fileExt}`;
+
+    const { error } = await supabase.storage
+      .from("images")
+      .upload(fileName, sourceFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      alert("Unable to uplaod video. Please try again.");
+      return;
+    }
+
+    const publicUrlResponse = supabase.storage
+      .from("images")
+      .getPublicUrl(fileName);
+
+    const { publicUrl } = publicUrlResponse.data;
+
+    try {
+      const response = await axios.post(`${API_URL}/api/v1/videos`, {
+        user_id: localStorage.getItem(ANON_USER_ID),
+        image_url: publicUrl,
+        prompt: prompt,
+      });
+
+      setVideos((prev) => {
+        return [
+          {
+            id: response.data.video.id,
+            status: response.data.video.status,
+            image_url: response.data.video.image_url,
+            video_url: "",
+          },
+          ...prev,
+        ];
+      });
+
+      reset(undefined);
+    } catch (error: any) {
+      alert(`An error accurred: ${error.message}. Try again`);
+    }
+  };
+
+  const reset = (event: React.MouseEvent<HTMLButtonElement> | undefined) => {
+    if (event) {
+      event.preventDefault();
+    }
+
+    if (prompt === "" || sourceFile === undefined) {
+      return;
+    }
+
+    if (sourceFileRef.current) {
+      sourceFileRef.current.value = "";
+    }
+
+    setPrompt("");
+    setSourceFile(undefined);
   };
 
   return (
@@ -157,15 +191,25 @@ function App() {
               Describe the desired scene you would like to see
             </p>
             <Textarea
+              ref={sourceFileRef}
               placeholder="A busy cyberpunk street"
-              size="lg"
+              size="sm"
               onChange={handlePromptChange}
               value={prompt}
             />
           </div>
           <FileInput onChange={handleUpload} />
+          <div className="flex flex-row gap-x-10 w-full justify-center">
+            <Button color="primary" onClick={create}>
+              Create
+            </Button>
+            <Button color="secondary" onClick={reset}>
+              Reset
+            </Button>
+          </div>
         </div>
       </div>
+      <Divider />
       <Grid items={videos} updateCallback={callback} />
     </div>
   );
