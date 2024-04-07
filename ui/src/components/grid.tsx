@@ -13,11 +13,15 @@ export default function Grid({
 }) {
   return (
     <div className="flex justify-center flex-row gap-x-10">
-      {items.map((item) => {
-        return (
-          <GridItem key={item.id} item={item} updateCallback={updateCallback} />
-        );
-      })}
+      {items.length > 0 ? (
+        items.map((item) => {
+          return (
+            <GridItem key={item.id} item={item} updateCallback={updateCallback} />
+          );
+        })
+      ) : (
+        <p>You have no videos yet.</p>
+      )}
     </div>
   );
 }
