@@ -183,7 +183,10 @@ function App() {
 
   return (
     <div className="container">
-      <h1 className="text-3xl font-bold">Bring your images to life</h1>
+      <div className="flex flex-col space-y-1">
+        <h1 className="text-3xl font-bold">Bring your images to life</h1>
+        <h1 className="text">Turn your images into videos</h1>
+      </div>
       <div className="py-10">
         <div className="flex flex-col justify-center space-y-2">
           <div className="flex flex-col space-y-2">
