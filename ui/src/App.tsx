@@ -6,16 +6,13 @@ import { FileInput, Card, Loading, Textarea } from "react-daisyui";
 import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
 
-import usePolling from "./hooks/useStatus";
+import Grid from "./components/grid";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const SUPABASE_API_URL = import.meta.env.VITE_SUPABASE_API_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabase = createClient(
-  SUPABASE_API_URL,
-  SUPABASE_ANON_KEY
-);
+const supabase = createClient(SUPABASE_API_URL, SUPABASE_ANON_KEY);
 
 const ALLOWED_IMAGE_EXTENSIONS = ["png", "jpg"];
 
@@ -29,16 +26,25 @@ type Video = {
 };
 
 function App() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   const [prompt, setPrompt] = useState("");
+  const [videos, setVideos] = useState<Video[]>([]);
 
-  const [video, setVideo] = useState<Video>({
-    id: "",
-    status: "",
-    image_url: "",
-    video_url: "",
-  });
+  useEffect(() => {
+    const getVideos = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/v1/videos`, {
+          params: {
+            user_id: localStorage.getItem(ANON_USER_ID),
+          },
+        });
+        setVideos([...response.data.assets]);
+      } catch (error: any) {
+        console.error(`Something went wrong. Error ${error.response.data}`);
+      }
+    };
+
+    getVideos();
+  }, []);
 
   useEffect(() => {
     if (!localStorage.getItem(ANON_USER_ID)) {
@@ -46,39 +52,25 @@ function App() {
     }
   }, []);
 
-  const shouldPoll =
-    (video?.id !== "" && video?.status === undefined) ||
-    video?.status === null ||
-    video?.status === "" ||
-    video?.status === "enqueued" ||
-    video?.status !== "error";
-
   const callback = async (id: string) => {
     try {
       const response = await axios.get(`${API_URL}/api/v1/videos/${id}`);
-      setVideo({ 
-        ...video,
-        ...response.data.video
+
+      setVideos((prev) => {
+        return prev.map((vid) => {
+          if (vid.id === id) {
+            return {
+              ...vid,
+              ...response.data.video,
+            };
+          }
+          return vid;
+        });
       });
     } catch (error) {
       console.error("============= something went wrong here ==============");
     }
   };
-
-  // run this effect when ever video.id === "completed"
-  useEffect(() => {
-    if (videoRef.current && videoRef.current.src !== video.video_url) {
-      videoRef.current.src = video.video_url;
-      videoRef.current.load();
-    }
-  }, [video.video_url, video?.id]);
-
-
-  const pollingState = usePolling(video?.id || "", shouldPoll, callback);
-
-  const { isPolling } = pollingState;
-
-  const showVideoPlaceHolder = shouldPoll && isPolling;
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
@@ -124,30 +116,23 @@ function App() {
 
       const { publicUrl } = publicUrlResponse.data;
 
-      setVideo({
-        id: "",
-        status: "",
-        image_url: publicUrl,
-        video_url: "",
-      });
-
       try {
-        const response = await axios.post(
-          `${API_URL}/api/v1/videos`,
-          {
-            user_id: localStorage.getItem(ANON_USER_ID),
-            image_url: publicUrl,
-            prompt: prompt,
-          },
-        );
+        const response = await axios.post(`${API_URL}/api/v1/videos`, {
+          user_id: localStorage.getItem(ANON_USER_ID),
+          image_url: publicUrl,
+          prompt: prompt,
+        });
 
-        console.log("respose from api/v1/videos", response.data);
-
-        setVideo({
-          id: response.data.video.id,
-          status: response.data.video.status,
-          image_url: response.data.video.image_url,
-          video_url: "",
+        setVideos((prev) => {
+          return [
+            {
+              id: response.data.video.id,
+              status: response.data.video.status,
+              image_url: response.data.video.image_url,
+              video_url: "",
+            },
+            ...prev,
+          ];
         });
       } catch (error: any) {
         event.target.value = "";
@@ -156,45 +141,11 @@ function App() {
     }
   };
 
-  console.log({ pollingState });
-
-  const getVideoContainer = () => {
-    if (showVideoPlaceHolder) {
-      return (
-        <div
-          className="flex items-center"
-          style={{ width: 320, height: "100%" }}
-        >
-          <p>Generating video <Loading /> This will take awhile</p>
-        </div>
-      );
-    } else if (video.video_url !== "") {
-      return (
-        <div
-          className="flex items-center"
-          style={{ width: "100%", height: "100%" }}
-        >
-          <video
-            ref={videoRef}
-            width="200px"
-            height="200px"
-            controls
-            autoPlay
-            loop
-          >
-            <source src={video?.video_url} />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      );
-    }
-
-    return null;
-  };
-
-  const handlePromptChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handlePromptChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     setPrompt(event.target.value);
-  }
+  };
 
   return (
     <div className="container">
@@ -202,7 +153,9 @@ function App() {
       <div className="py-10">
         <div className="flex flex-col justify-center space-y-2">
           <div className="flex flex-col space-y-2">
-            <p className="text-1xl">Describe the desired scene you would like to see</p>
+            <p className="text-1xl">
+              Describe the desired scene you would like to see
+            </p>
             <Textarea
               placeholder="A busy cyberpunk street"
               size="lg"
@@ -213,19 +166,7 @@ function App() {
           <FileInput onChange={handleUpload} />
         </div>
       </div>
-      <div className="flex justify-center flex-row">
-        <Card className="flex flex-row">
-          {video?.image_url && (
-            <img
-              src={video?.image_url} 
-              alt="uploaded picture"
-              width="200px"
-              height="200px"
-            />
-          )}
-          <div>{getVideoContainer()}</div>
-        </Card>
-      </div>
+      <Grid items={videos} updateCallback={callback} />
     </div>
   );
 }

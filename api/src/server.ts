@@ -16,7 +16,9 @@ import generateImageToVideoHandler from "./api/v1/images/generate_to_video";
 import ImageToVideoWebhookHandler from "./api/v1/webhooks";
 import statusHandler from "./api/v1/images/status";
 
-import getVideoHandler from "./api/v1/images/get"
+import getVideoHandler from "./api/v1/images/get";
+
+import getVideosHandler from "./api/v1/images/list";
 
 const app: Express = express();
   
@@ -30,10 +32,12 @@ app.get("/api/v1/test", (req: Request, res: Response) => {
 });
   
 app.post("/api/v1/videos", generateImageToVideoHandler);
-app.post("/api/v1/webhooks/videos", ImageToVideoWebhookHandler);
+app.get("/api/v1/videos", getVideosHandler);
 app.get("/api/v1/videos/:id/status", statusHandler);
 app.get("/api/v1/videos/:id", getVideoHandler);
   
+app.post("/api/v1/webhooks/videos", ImageToVideoWebhookHandler);
+
 const port = process.env.PORT || 5000;
   
 app.set("port", port);
