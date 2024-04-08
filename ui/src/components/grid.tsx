@@ -12,7 +12,7 @@ export default function Grid({
   updateCallback: UpdateCallback;
 }) {
   return (
-    <div className="flex justify-center flex-row gap-x-10">
+    <div className="flex justify-center flex-row gap-x-10 grid grid-cols-4 gap-4">
       {items.length > 0 ? (
         items.map((item) => {
           return (
@@ -60,7 +60,7 @@ const GridItem = ({
       return (
         <div
           className="flex items-center flex-col justify-center spacy-y-2"
-          style={{ width: 320, height: "100%" }}
+          style={{ width: "100%", height: "100%" }}
         >
           <p>
             Generating video 
@@ -77,8 +77,6 @@ const GridItem = ({
         >
           <video
             ref={videoRef}
-            width="200px"
-            height="200px"
             controls
             autoPlay
             loop
@@ -94,12 +92,10 @@ const GridItem = ({
   };
 
   return (
-    <Card className="flex flex-row p-2 bordered">
+    <Card className="flex flex-col p-2 bordered">
       <img
         src={item?.image_url}
         alt="uploaded picture"
-        width="200px"
-        height="200px"
       />
       {getVideoContainer()}
     </Card>
