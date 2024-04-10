@@ -20,6 +20,8 @@ import getVideoHandler from "./api/v1/images/get";
 
 import getVideosHandler from "./api/v1/images/list";
 
+import deleteVideoHandler from "./api/v1/images/delete";
+
 const app: Express = express();
   
 app.use(cors());
@@ -35,6 +37,7 @@ app.post("/api/v1/videos", generateImageToVideoHandler);
 app.get("/api/v1/videos", getVideosHandler);
 app.get("/api/v1/videos/:id/status", statusHandler);
 app.get("/api/v1/videos/:id", getVideoHandler);
+app.delete("/api/v1/videos/:id", deleteVideoHandler);
   
 app.post("/api/v1/webhooks/videos", ImageToVideoWebhookHandler);
 

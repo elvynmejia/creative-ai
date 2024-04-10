@@ -3,13 +3,16 @@ import { Card, Loading, Button } from "react-daisyui";
 import usePolling from "../hooks/useStatus";
 
 type UpdateCallback = (id: string) => Promise<void>;
+type OnDeleteCallback = (id: string) => Promise<void>;
 
 export default function Grid({
   items,
   updateCallback,
+  onVideoDelete
 }: {
   items: any[];
   updateCallback: UpdateCallback;
+  onVideoDelete: OnDeleteCallback;
 }) {
   return (
     <div>
@@ -21,16 +24,13 @@ export default function Grid({
                 key={item.id}
                 item={item}
                 updateCallback={updateCallback}
+                onVideoDelete={onVideoDelete}
               />
             );
           })}
         </div>
       ) : (
-        <p
-          className="flex justify-center"
-        >
-          You have no videos yet.
-        </p>
+        <p className="flex justify-center">You have no videos yet.</p>
       )}
     </div>
   );
@@ -39,9 +39,11 @@ export default function Grid({
 const GridItem = ({
   item,
   updateCallback,
+  onVideoDelete,
 }: {
   item: any;
   updateCallback: UpdateCallback;
+  onVideoDelete: OnDeleteCallback;
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -94,23 +96,26 @@ const GridItem = ({
     return null;
   };
 
-  const onDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const onDelete = async (
+    event: React.MouseEvent<HTMLButtonElement>,
+    id: string,
+  ) => {
     event.preventDefault();
-    alert("Feature coming up");
-  }
+    if (
+      confirm("Are you sure you want to delete this video?")
+    ) {
+      await onVideoDelete(id);
+    }
+  };
 
   return (
     <Card className="flex flex-col p-2 bordered">
       <img src={item?.image_url} alt="uploaded picture" />
       {getVideoContainer()}
       <Card.Actions className="justify-end mt-5">
-          <Button 
-            color="neutral"
-            size="sm"
-            onClick={onDelete}
-          >
-            Delete
-          </Button>
+        <Button color="neutral" size="sm" onClick={(e) => onDelete(e, item.id)}>
+          Delete
+        </Button>
       </Card.Actions>
     </Card>
   );

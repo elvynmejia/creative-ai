@@ -14,20 +14,18 @@ export default async (req: Request, res: Response) => {
     }
 
     // TODO: check user id against users
-
     // TODO: add a range for pagination
     const { data, error, count } = await admin
       .from("images")
       .select("*", { count: "exact" })
       .eq("user_id", user_id)
-      .order("created_at", { ascending: false });
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
     // .range(page * perPage, page * perPage + perPage - 1);
 
     if (error) {
         console.error(`Unable to get images. Error ${JSON.stringify(error, null, 2)}`);
-        return res
-            .status(500)
-            .json({ images: "Internal Server Error: Unable to retreive images" });
+        throw new Error("Unable to retreive list of images");
     }
 
     return res

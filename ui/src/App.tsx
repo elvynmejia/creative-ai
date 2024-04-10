@@ -181,6 +181,19 @@ function App() {
     setSourceFile(undefined);
   };
 
+  const onVideoDelete = async (id: string) => {
+    try {
+      await axios.delete(`${API_URL}/api/v1/videos/${id}`);
+      
+      setVideos((prev) => {
+        return [...prev].filter((e) => e.id !== id);
+      });
+
+    } catch (error: any) {
+      alert(`An error accurred: ${error.message}. Try again`);
+    }
+  };
+
   return (
     <div className="container">
       <div className="flex flex-col space-y-1">
@@ -213,7 +226,11 @@ function App() {
         </div>
       </div>
       <Divider />
-      <Grid items={videos} updateCallback={callback} />
+      <Grid
+        items={videos}
+        updateCallback={callback}
+        onVideoDelete={onVideoDelete}
+      />
     </div>
   );
 }
