@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { Card, Loading } from "react-daisyui";
+import { Card, Loading, Button } from "react-daisyui";
 import usePolling from "../hooks/useStatus";
 
 type UpdateCallback = (id: string) => Promise<void>;
@@ -12,15 +12,25 @@ export default function Grid({
   updateCallback: UpdateCallback;
 }) {
   return (
-    <div className="flex justify-center flex-row gap-x-10 grid grid-cols-4 gap-4">
+    <div>
       {items.length > 0 ? (
-        items.map((item) => {
-          return (
-            <GridItem key={item.id} item={item} updateCallback={updateCallback} />
-          );
-        })
+        <div className="flex justify-center flex-row gap-x-10 grid grid-cols-4 gap-4">
+          {items.map((item) => {
+            return (
+              <GridItem
+                key={item.id}
+                item={item}
+                updateCallback={updateCallback}
+              />
+            );
+          })}
+        </div>
       ) : (
-        <p>You have no videos yet.</p>
+        <p
+          className="flex justify-center"
+        >
+          You have no videos yet.
+        </p>
       )}
     </div>
   );
@@ -62,10 +72,8 @@ const GridItem = ({
           className="flex items-center flex-col justify-center spacy-y-2"
           style={{ width: "100%", height: "100%" }}
         >
-          <p>
-            Generating video 
-          </p>
-          <Loading /> 
+          <p>Generating video</p>
+          <Loading />
           <p>This will take awhile</p>
         </div>
       );
@@ -75,29 +83,35 @@ const GridItem = ({
           className="flex items-center"
           style={{ width: "100%", height: "100%" }}
         >
-          <video
-            ref={videoRef}
-            controls
-            autoPlay
-            loop
-          >
+          <video ref={videoRef} controls autoPlay loop>
             <source src={item?.video_url} />
             Your browser does not support the video tag.
           </video>
         </div>
       );
     }
-    
+
     return null;
   };
 
+  const onDelete = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    alert("Feature coming up");
+  }
+
   return (
     <Card className="flex flex-col p-2 bordered">
-      <img
-        src={item?.image_url}
-        alt="uploaded picture"
-      />
+      <img src={item?.image_url} alt="uploaded picture" />
       {getVideoContainer()}
+      <Card.Actions className="justify-end mt-5">
+          <Button 
+            color="neutral"
+            size="sm"
+            onClick={onDelete}
+          >
+            Delete
+          </Button>
+      </Card.Actions>
     </Card>
   );
 };
