@@ -14,9 +14,9 @@ const proccesVideo = async ({
   inputImageUrl: string;
 }) => {
   try {
-    console.info("Processing video", { 
-        outputVideoUrl,
-        inputImageUrl,
+    console.info("Processing video", {
+      outputVideoUrl,
+      inputImageUrl,
     });
 
     const response = await axios.get(outputVideoUrl, {
@@ -33,7 +33,9 @@ const proccesVideo = async ({
       });
 
     if (uploadResponse.error) {
-        console.error(`Error uploading output video. ${uploadResponse.error.message}`);
+      console.error(
+        `Error uploading output video. ${uploadResponse.error.message}`,
+      );
     }
 
     const publicUrlResponse = supabase.storage
@@ -51,7 +53,7 @@ const proccesVideo = async ({
       console.error("Error saving resulting video video_url to images", {
         inputImageUrl,
         outputVideoUrl,
-        error
+        error,
       });
     }
 
@@ -75,9 +77,12 @@ export default async (req: Request, res: Response) => {
     const { status, input, output } = req.body;
 
     if (status === "succeeded") {
-      await proccesVideo({ inputImageUrl: input.image, outputVideoUrl: output });
+      await proccesVideo({
+        inputImageUrl: input.image,
+        outputVideoUrl: output,
+      });
     }
-    
+
     return res.status(200).json({});
   } catch (error: any) {
     return res
