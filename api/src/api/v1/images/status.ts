@@ -7,7 +7,7 @@ import { get } from "../../../redis";
 
 export default async (req: Request, res: Response) => {
     // id is the url, validate against this
-    console.info("Entering /api/v1/videos/:id/status", { id: req.params.id });
+    console.info("Entering GET /api/v1/videos/:id/status", { id: req.params.id });
     try {
 
         // await save(`id_to_image_url:${data.id}`, data.image_url);

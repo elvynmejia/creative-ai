@@ -6,7 +6,7 @@ import {
 import admin from "../../../supabase";
 
 export default async (req: Request, res: Response) => {
-    console.info("Entering /api/v1/videos/:id", req.params.id);
+    console.info("Entering GET /api/v1/videos/:id", req.params.id);
     try {
         const id = req.params.id;
 

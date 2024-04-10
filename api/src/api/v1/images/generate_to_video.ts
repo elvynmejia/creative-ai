@@ -9,7 +9,7 @@ import admin from "../../../supabase";
 import { save } from "../../../redis";
 
 export default async (req: Request, res: Response) => {
-    console.info("Entering, /api/v1/videos", req.body);
+    console.info("Entering POST /api/v1/videos", req.body);
 
     try {
         const { prompt, image_url, user_id } = req.body;

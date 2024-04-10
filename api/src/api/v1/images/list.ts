@@ -3,7 +3,7 @@ import { type Request, type Response } from "express";
 import admin from "../../../supabase";
 
 export default async (req: Request, res: Response) => {
-  console.info("Entering /api/v1/videos", req.query);
+  console.info("Entering GET /api/v1/videos", req.query);
   try {
     const { user_id } = req.query;
 
