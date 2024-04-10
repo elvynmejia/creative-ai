@@ -16,7 +16,6 @@ export const save = async (key: string, value: string, exp?: number) => {
 
 export const get = async (key: string) => {
     const status = await redis.get(key);
-    console.log("redis.get", { key, status });
     return status;
 };
 
