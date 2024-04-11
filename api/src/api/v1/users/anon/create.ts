@@ -25,7 +25,10 @@ export default async (req: Request, res: Response) => {
 
     // user exists do nothing
     if (userUuid) {
-      console.info("Nothing to do here. User with that IP address already exists");
+      console.info("User with that IP address already exists. Setting cookie either way");
+
+      res.cookie("anonUser", ip, cookieOptions);
+
       return res.status(204).send();
     }
 

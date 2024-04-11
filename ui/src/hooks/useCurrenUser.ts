@@ -46,6 +46,11 @@ export const UseUser = () => {
         alert("Something went wrong. Please refresh the page.");
       }
     };
+    
     setUser();
+    // clean up
+    () => {
+      localStorage.removeItem(ANON_USER_ID);
+    }
   }, []);
 };
