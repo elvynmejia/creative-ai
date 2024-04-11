@@ -4,13 +4,12 @@ import React, { useEffect, useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { FileInput, Textarea, Button, Divider } from "react-daisyui";
 import { createClient } from "@supabase/supabase-js";
-import axios from "axios";
 
 import Grid from "./components/grid";
 
-const API_URL = import.meta.env.VITE_API_URL;
-const SUPABASE_API_URL = import.meta.env.VITE_SUPABASE_API_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+import { UseUser } from "./hooks/useCurrenUser";
+
+import { axiosClient, SUPABASE_ANON_KEY, SUPABASE_API_URL } from "./utils";
 
 const supabase = createClient(SUPABASE_API_URL, SUPABASE_ANON_KEY);
 
@@ -26,6 +25,7 @@ type Video = {
 };
 
 function App() {
+  UseUser();
   const sourceFileRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState("");
   const [videos, setVideos] = useState<Video[]>([]);
@@ -34,11 +34,7 @@ function App() {
   useEffect(() => {
     const getVideos = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/v1/videos`, {
-          params: {
-            user_id: localStorage.getItem(ANON_USER_ID),
-          },
-        });
+        const response = await axiosClient.get(`/api/v1/videos`);
         setVideos([...response.data.assets]);
       } catch (error: any) {
         console.error(`Something went wrong. Error ${error.response.data}`);
@@ -56,7 +52,7 @@ function App() {
 
   const callback = async (id: string) => {
     try {
-      const response = await axios.get(`${API_URL}/api/v1/videos/${id}`);
+      const response = await axiosClient.get(`/api/v1/videos/${id}`);
 
       setVideos((prev) => {
         return prev.map((vid) => {
@@ -140,7 +136,7 @@ function App() {
     const { publicUrl } = publicUrlResponse.data;
 
     try {
-      const response = await axios.post(`${API_URL}/api/v1/videos`, {
+      const response = await axiosClient.post(`/api/v1/videos`, {
         user_id: localStorage.getItem(ANON_USER_ID),
         image_url: publicUrl,
         prompt: prompt,
@@ -183,7 +179,7 @@ function App() {
 
   const onVideoDelete = async (id: string) => {
     try {
-      await axios.delete(`${API_URL}/api/v1/videos/${id}`);
+      await axiosClient.delete(`/api/v1/videos/${id}`);
       
       setVideos((prev) => {
         return [...prev].filter((e) => e.id !== id);

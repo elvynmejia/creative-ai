@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+
+import { axiosClient } from "../utils";
 
 export interface PollingResponse {
   data: any | null;
@@ -8,7 +9,6 @@ export interface PollingResponse {
 }
 
 const POLLING_FREQUENCY = 60000;
-const API_URL = import.meta.env.VITE_API_URL;
 
 const usePolling = (
   id: string,
@@ -29,8 +29,8 @@ const usePolling = (
     
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${API_URL}/api/v1/videos/${id}/status`
+        const response = await axiosClient.get(
+          `/api/v1/videos/${id}/status`
         );
 
         setData(response.data.video);

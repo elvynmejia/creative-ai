@@ -54,12 +54,7 @@ const GridItem = ({
     }
   }, [item.video_url, item?.id]);
 
-  const shouldPoll =
-    (item?.id !== "" && item?.status === undefined) ||
-    item?.status === null ||
-    item?.status === "" ||
-    item?.status === "enqueued" ||
-    item?.status !== "error";
+  const shouldPoll = item?.status === "enqueued";
 
   const pollingState = usePolling(item?.id || "", shouldPoll, updateCallback);
 
