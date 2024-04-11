@@ -29,6 +29,7 @@
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.4.0",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
