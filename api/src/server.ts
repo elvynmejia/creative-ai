@@ -43,6 +43,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.post("/api/v1/users/anon", setAnonUserHandler);
+app.post("/api/v1/webhooks/videos", ImageToVideoWebhookHandler);
 
 // must check for anonUser cookie from here on the following routes
 app.use(anonUserMiddleware);
@@ -52,8 +53,6 @@ app.get("/api/v1/videos", getVideosHandler);
 app.get("/api/v1/videos/:id/status", statusHandler);
 app.get("/api/v1/videos/:id", getVideoHandler);
 app.delete("/api/v1/videos/:id", deleteVideoHandler);
-
-app.post("/api/v1/webhooks/videos", ImageToVideoWebhookHandler);
 
 const port = process.env.PORT || 5000;
 
