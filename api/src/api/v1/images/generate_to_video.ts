@@ -12,21 +12,23 @@ export default async (req: Request, res: Response) => {
     console.info("Entering POST /api/v1/videos", req.body);
 
     try {
-        const { prompt, image_url, user_id } = req.body;
+        const { prompt, image_url } = req.body;
 
-        if ([prompt, image_url, user_id].some(key => key === "" || key == undefined || key === null)) {
-            return res.status(422).json({ error: "Missing required prompt, image_url and user_id" });
+        const userId = req.user?.id;
+
+        if ([prompt, image_url].some(key => key === "" || key == undefined || key === null)) {
+            return res.status(422).json({ error: "Missing required prompt and image_url" });
         }
 
         const { data, error } = await admin
             .from("images")
-            .insert({ image_url: image_url, status: "enqueued", user_id })
+            .insert({ image_url: image_url, status: "enqueued", user_id: userId })
             .select()
             .single();
             
         if (error) {
             // raise to Sentry or something similar
-            console.error("Error inserting images", { error,  prompt, image_url, user_id });
+            console.error("Error inserting images", { error,  prompt, image_url, user_id: userId });
         }
 
         // TODO: isolate mapping here

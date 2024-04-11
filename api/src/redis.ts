@@ -14,9 +14,9 @@ export const save = async (key: string, value: string, exp?: number) => {
     return redis.set(key, value, { ex: expirationInSeconds });
 };
 
-export const get = async (key: string) => {
-    const status = await redis.get(key);
-    return status;
+export const get = async (key: string): Promise<string | null> => {
+    const status: string = (await redis.get(key)) as unknown as string;
+    return status ? status : null;
 };
 
 export default redis;

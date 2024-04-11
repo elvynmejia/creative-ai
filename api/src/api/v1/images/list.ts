@@ -5,20 +5,11 @@ import admin from "../../../supabase";
 export default async (req: Request, res: Response) => {
   console.info("Entering GET /api/v1/videos", req.query);
   try {
-    const { user_id } = req.query;
-
-    if (!user_id) {
-      return res
-        .status(422)
-        .json({ error: `user_id is required: given user_id: ${user_id}` });
-    }
-
-    // TODO: check user id against users
     // TODO: add a range for pagination
     const { data, error, count } = await admin
       .from("images")
       .select("*", { count: "exact" })
-      .eq("user_id", user_id)
+      .eq("user_id", req?.user?.id)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
     // .range(page * perPage, page * perPage + perPage - 1);

@@ -14,6 +14,7 @@
       "src/**/*",
       "spec/**/*"
     ],
+    "files": ["index.d.ts"]
     // "exclude": [
     //   "spec/**/*"
     // ]
